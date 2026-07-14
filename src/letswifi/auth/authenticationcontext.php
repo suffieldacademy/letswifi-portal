@@ -121,6 +121,7 @@ class AuthenticationContext implements JsonSerializable
 				userId: $userId,
 				clientId: 'browser',
 				grantSid: null,
+				attributes: $this->browserAuth->getAttributes(),
 			);
 		}
 
@@ -159,7 +160,10 @@ class AuthenticationContext implements JsonSerializable
 			}
 		}
 		$affiliations = \explode( ',', $grant->__get( 'affiliations' ) ?? '' );
-
+		$attributes = json_decode(
+					  $grant->__get('attributes') ?? '{}',
+					  true
+					  );
 		if ( null === $grant->client_id ) {
 			throw new DomainException( "User {$sub} with realm {$grant->realm} has no client_id" );
 		}
@@ -171,7 +175,7 @@ class AuthenticationContext implements JsonSerializable
 			clientId: $grant->client_id,
 			grantSid: $grant->__get( 'sid' ),
 			affiliations: $affiliations,
-			attributes: $this->browserAuth->getAttributes(),
+			attributes: $attributes,
 			realm: $realm,
 		);
 	}
