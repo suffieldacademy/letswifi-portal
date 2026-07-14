@@ -84,6 +84,19 @@ class SimpleSAMLAuth implements BrowserAuthInterface
 	/**
 	 * @suppress PhanUndeclaredClassMethod We don't have a dependency on SimpleSAMLphp
 	 */
+	public function getAttributes(): array
+	{
+	  if ( null === $this->attributes ) {
+	    $this->attributes = $this->as->getAttributes();
+	    assert( is_array( $this->attributes ) );
+	  }
+
+	  return $this->attributes;
+	}
+
+	/**
+	 * @suppress PhanUndeclaredClassMethod We don't have a dependency on SimpleSAMLphp
+	 */
 	public function getUserId(): ?string
 	{
 		return $this->isLoggedIn() ? $this->requireAuth() : null;

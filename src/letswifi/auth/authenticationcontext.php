@@ -171,11 +171,12 @@ class AuthenticationContext implements JsonSerializable
 			clientId: $grant->client_id,
 			grantSid: $grant->__get( 'sid' ),
 			affiliations: $affiliations,
+			attributes: $this->browserAuth->getAttributes(),
 			realm: $realm,
 		);
 	}
 
-	private function constructAuthenticatedUser( Provider $provider, string $userId, string $clientId, ?string $grantSid, ?array $affiliations = null, ?Realm $realm = null ): User
+	private function constructAuthenticatedUser( Provider $provider, string $userId, string $clientId, ?string $grantSid, ?array $affiliations = null, ?array $attributes = null, ?Realm $realm = null ): User
 	{
 		return new User(
 			userId: $userId,
@@ -184,6 +185,7 @@ class AuthenticationContext implements JsonSerializable
 				? $provider->getRealmsByAffiliations( $this->browserAuth->getAffiliations() )
 				: [$realm->realmId => $realm],
 			affiliations: $affiliations ?? $this->browserAuth->getAffiliations(),
+			attributes: $attributes ?? [],
 			clientId: $clientId,
 			grantSid: $grantSid,
 			ip: $_SERVER['REMOTE_ADDR'] ?? null,
