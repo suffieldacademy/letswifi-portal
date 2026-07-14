@@ -121,7 +121,6 @@ class AuthenticationContext implements JsonSerializable
 				userId: $userId,
 				clientId: 'browser',
 				grantSid: null,
-				attributes: $this->browserAuth->getAttributes(),
 			);
 		}
 
@@ -182,6 +181,19 @@ class AuthenticationContext implements JsonSerializable
 
 	private function constructAuthenticatedUser( Provider $provider, string $userId, string $clientId, ?string $grantSid, ?array $affiliations = null, ?array $attributes = null, ?Realm $realm = null ): User
 	{
+
+	  // FIXME: temp debugging of attributes to see 
+	  $attrs = $attributes ?? $this->browserAuth->getAttributes();
+	  error_log(
+		    'letswifi attributes for user '
+		    . $userId
+		    . ': '
+		    . json_encode(
+				  $attrs,
+				  JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+				  )
+		    );
+
 		return new User(
 			userId: $userId,
 			provider: $provider,
@@ -189,7 +201,7 @@ class AuthenticationContext implements JsonSerializable
 				? $provider->getRealmsByAffiliations( $this->browserAuth->getAffiliations() )
 				: [$realm->realmId => $realm],
 			affiliations: $affiliations ?? $this->browserAuth->getAffiliations(),
-			attributes: $attributes ?? [],
+			attributes: $attributes ?? $this->browserAuth->getAttributes(),
 			clientId: $clientId,
 			grantSid: $grantSid,
 			ip: $_SERVER['REMOTE_ADDR'] ?? null,
