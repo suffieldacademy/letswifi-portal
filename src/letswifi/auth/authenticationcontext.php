@@ -159,10 +159,10 @@ class AuthenticationContext implements JsonSerializable
 			}
 		}
 		$affiliations = \explode( ',', $grant->__get( 'affiliations' ) ?? '' );
-		$attributes = json_decode(
-					  $grant->__get('attributes') ?? '{}',
-					  true
-					  );
+		$attributes = \json_decode(
+			$grant->__get( 'attributes' ) ?? '{}',
+			true,
+		);
 		if ( null === $grant->client_id ) {
 			throw new DomainException( "User {$sub} with realm {$grant->realm} has no client_id" );
 		}
@@ -181,19 +181,6 @@ class AuthenticationContext implements JsonSerializable
 
 	private function constructAuthenticatedUser( Provider $provider, string $userId, string $clientId, ?string $grantSid, ?array $affiliations = null, ?array $attributes = null, ?Realm $realm = null ): User
 	{
-
-	  // FIXME: temp debugging of attributes to see 
-	  $attrs = $attributes ?? $this->browserAuth->getAttributes();
-	  error_log(
-		    'letswifi attributes for user '
-		    . $userId
-		    . ': '
-		    . json_encode(
-				  $attrs,
-				  JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
-				  )
-		    );
-
 		return new User(
 			userId: $userId,
 			provider: $provider,

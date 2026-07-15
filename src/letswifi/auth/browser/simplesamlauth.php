@@ -86,12 +86,12 @@ class SimpleSAMLAuth implements BrowserAuthInterface
 	 */
 	public function getAttributes(): array
 	{
-	  if ( null === $this->attributes ) {
-	    $this->attributes = $this->as->getAttributes();
-	    assert( is_array( $this->attributes ) );
-	  }
+		if ( null === $this->attributes ) {
+			$this->attributes = $this->as->getAttributes();
+			\assert( \is_array( $this->attributes ) );
+		}
 
-	  return $this->attributes;
+		return $this->attributes;
 	}
 
 	/**
