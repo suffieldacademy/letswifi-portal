@@ -71,6 +71,7 @@ class Realm implements JsonSerializable
 			extra: \array_filter( [
 				'mobileconfig_identifier' => $realmData->getStringOrNull( 'mobileconfig_identifier' ),
 				'mobileconfig_display_name' => $realmData->getStringOrNull( 'mobileconfig_display_name' ),
+				'eap_username' => $realmData->getStringOrNull( 'eap_username' ),
 			] ),
 		);
 	}
@@ -89,7 +90,7 @@ class Realm implements JsonSerializable
 	}
 
 	/**
-	 * @return array{realm_id:string,display_name:MultiLanguageString,description:?MultiLanguageString,contact:?Contact,location:array<Location>,logo:bool,signer:string,trust:array<string>,networks:array<string,array{oids?:array<string>,nai_realms?:array<string>,ssid?:string,display_name:MultiLanguageString}>}
+	 * @return array{realm_id:string,display_name:MultiLanguageString,description:?MultiLanguageString,contact:?Contact,location:array<Location>,eap_username:?string,logo:bool,signer:string,trust:array<string>,networks:array<string,array{oids?:array<string>,nai_realms?:array<string>,ssid?:string,display_name:MultiLanguageString}>}
 	 */
 	public function jsonSerialize(): array
 	{
@@ -98,6 +99,7 @@ class Realm implements JsonSerializable
 			'display_name' => $this->displayName,
 			'description' => $this->description,
 			'contact' => $this->getContact(),
+			'eap_username' => $this->eapUsername,
 			'location' => $this->location,
 			'logo' => isset( $this->logo ),
 			'signer' => $this->signer,
