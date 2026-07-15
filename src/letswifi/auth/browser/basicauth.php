@@ -73,4 +73,9 @@ class BasicAuth implements BrowserAuthInterface
 
 		return [];
 	}
+
+	public function getAttributes(): array
+	{
+		return [];
+	}
 }
