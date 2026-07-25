@@ -63,8 +63,8 @@ abstract class Credential implements JsonSerializable
 
 	public function getOuterIdentity(): string
 	{
-		if ( $this->realm->outerIdentity ) {
-			return $this->realm->outerIdentity;
+	        if ( $this->realm->getExtra( 'eap_username' ) ) {
+		        return $this->realm->getExtra( 'eap_username' );
 		}
 		if ( $this->credentialId ) {
 			if ( \str_contains( $this->credentialId, '@' ) ) {

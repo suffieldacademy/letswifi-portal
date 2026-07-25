@@ -90,7 +90,7 @@ class Realm implements JsonSerializable
 	}
 
 	/**
-	 * @return array{realm_id:string,display_name:MultiLanguageString,description:?MultiLanguageString,contact:?Contact,location:array<Location>,outer_identity:?string,logo:bool,signer:string,trust:array<string>,networks:array<string,array{oids?:array<string>,nai_realms?:array<string>,ssid?:string,display_name:MultiLanguageString}>}
+	 * @return array{realm_id:string,display_name:MultiLanguageString,description:?MultiLanguageString,contact:?Contact,location:array<Location>,logo:bool,signer:string,trust:array<string>,networks:array<string,array{oids?:array<string>,nai_realms?:array<string>,ssid?:string,display_name:MultiLanguageString}>}
 	 */
 	public function jsonSerialize(): array
 	{
@@ -99,7 +99,6 @@ class Realm implements JsonSerializable
 			'display_name' => $this->displayName,
 			'description' => $this->description,
 			'contact' => $this->getContact(),
-			'outer_identity' => $this->outerIdentity,
 			'location' => $this->location,
 			'logo' => isset( $this->logo ),
 			'signer' => $this->signer,
