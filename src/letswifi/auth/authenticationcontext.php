@@ -159,7 +159,10 @@ class AuthenticationContext implements JsonSerializable
 			}
 		}
 		$affiliations = \explode( ',', $grant->__get( 'affiliations' ) ?? '' );
-
+		$attributes = \json_decode(
+			$grant->__get( 'attributes' ) ?? '{}',
+			true,
+		);
 		if ( null === $grant->client_id ) {
 			throw new DomainException( "User {$sub} with realm {$grant->realm} has no client_id" );
 		}
@@ -171,11 +174,12 @@ class AuthenticationContext implements JsonSerializable
 			clientId: $grant->client_id,
 			grantSid: $grant->__get( 'sid' ),
 			affiliations: $affiliations,
+			attributes: $attributes,
 			realm: $realm,
 		);
 	}
 
-	private function constructAuthenticatedUser( Provider $provider, string $userId, string $clientId, ?string $grantSid, ?array $affiliations = null, ?Realm $realm = null ): User
+	private function constructAuthenticatedUser( Provider $provider, string $userId, string $clientId, ?string $grantSid, ?array $affiliations = null, ?array $attributes = null, ?Realm $realm = null ): User
 	{
 		return new User(
 			userId: $userId,
@@ -184,6 +188,7 @@ class AuthenticationContext implements JsonSerializable
 				? $provider->getRealmsByAffiliations( $this->browserAuth->getAffiliations() )
 				: [$realm->realmId => $realm],
 			affiliations: $affiliations ?? $this->browserAuth->getAffiliations(),
+			attributes: $attributes ?? $this->browserAuth->getAttributes(),
 			clientId: $clientId,
 			grantSid: $grantSid,
 			ip: $_SERVER['REMOTE_ADDR'] ?? null,

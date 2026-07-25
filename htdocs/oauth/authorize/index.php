@@ -43,6 +43,7 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] ) {
 			[
 				'sub' => $user->userId,
 				'realm' => $realm->realmId,
+				'attributes' => \json_encode( $user->attributes ) ?: '{}',
 			],
 		), POST_VALUE === $_POST[POST_FIELD] );
 

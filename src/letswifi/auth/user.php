@@ -29,6 +29,7 @@ class User implements JsonSerializable
 		public readonly Provider $provider,
 		public readonly array $realms,
 		public readonly array $affiliations,
+		public readonly array $attributes = [],
 		public readonly ?string $clientId = null,
 		public readonly ?string $grantSid = null,
 		public readonly ?string $ip = null,

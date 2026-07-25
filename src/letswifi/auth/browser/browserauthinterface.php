@@ -56,4 +56,14 @@ interface BrowserAuthInterface
 	 * @return array<string> List of affiliations
 	 */
 	public function getAffiliations(): array;
+
+	/**
+	 * Get the attributes for the user
+	 *
+	 * This is used to retrieve claims returned by the IdP so they
+	 * can be logged, stored, or used in the certificate generation.
+	 *
+	 * @return array<string,array<string>> Attributes and values
+	 */
+	public function getAttributes(): array;
 }

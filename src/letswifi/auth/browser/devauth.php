@@ -56,4 +56,9 @@ class DevAuth implements BrowserAuthInterface
 	{
 		return $this->affiliations;
 	}
+
+	public function getAttributes(): array
+	{
+		return [];
+	}
 }
