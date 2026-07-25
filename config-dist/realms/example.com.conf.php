@@ -110,4 +110,11 @@ return [
 	// This name is displayed in the System Settings app, under Device Management.
 	// OPTIONAL: String
 	// 'mobileconfig_display_name' => "Let's Wi-Fi",
+
+	// EAP username to present during authentication.  Needed if
+	// you wish to override the identity to be anonymous by
+	// eliminating the identifier before the "@".  Some systems
+	// use a generic string like "anonymous@realm.tld".
+	// OPTIONAL: String
+	'eap_username' => '@example.com',
 ];

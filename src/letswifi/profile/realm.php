@@ -71,6 +71,7 @@ class Realm implements JsonSerializable
 			extra: \array_filter( [
 				'mobileconfig_identifier' => $realmData->getStringOrNull( 'mobileconfig_identifier' ),
 				'mobileconfig_display_name' => $realmData->getStringOrNull( 'mobileconfig_display_name' ),
+				'eap_username' => $realmData->getStringOrNull( 'eap_username' ),
 			] ),
 		);
 	}

@@ -161,7 +161,9 @@ class AppleMobileconfigFormat extends Format
 						. "\n";
 				}
 				$result .= '				</array>'
-					. "\n			</dict>"
+				  . "\n				<key>UserName</key>"
+				  . "\n				<string>" . $this::e( $this->credential->getOuterIdentity() ) . '</string>'
+				  . "\n			</dict>"
 					. "\n			<key>EncryptionType</key>"
 					. "\n			<string>WPA2</string>"
 					. "\n			<key>HIDDEN_NETWORK</key>"
