@@ -110,6 +110,11 @@ class StepCredentialIssuer implements CredentialIssuer
 		       '--console',
 		       ];
 
+	      // letswifi doesn't have access to as many user details
+	      // as MDM, so synthesize some information
+	      $argv[] = '--san=urn:sa:serial:BYOD';
+	      $argv[] = '--san=urn:sa:product:letswifi';
+
 	      // convert claims to san attributes
 	      foreach ($claims as $key => $value) {
 		if (str_starts_with($key, 'urn:sa:')) {
