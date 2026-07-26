@@ -24,6 +24,7 @@ use fyrkat\openssl\PKCS7;
 use letswifi\auth\User;
 use letswifi\configuration\Dictionary;
 use letswifi\configuration\DictionaryFile;
+use letswifi\credential\StepCredentialLog;
 use letswifi\credential\CertificateCredentialLog;
 use letswifi\credential\CredentialIssuer;
 use letswifi\credential\CredentialLog;
@@ -310,8 +311,8 @@ final class LetsWifiApp
 
 	public function getCredentialLog( User $user ): CredentialLog
 	{
-		// TODO decide which type of log we need, hardcode Certificate for now
-		return new CertificateCredentialLog(
+		// jhealy: changed hardcode to our custom step-ca provisioner
+		return new StepCredentialLog(
 			user: $user,
 			provider: $this->getProvider(),
 			profileService: $this->profileService,
