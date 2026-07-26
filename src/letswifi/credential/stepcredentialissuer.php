@@ -11,9 +11,6 @@
 
 namespace letswifi\credential;
 
-// ******** FIXME ***********
-require __DIR__ . '../../../_autoload.php';
-
 use letswifi\credential\CredentialIssuer;
 use letswifi\auth\User;
 use letswifi\profile\Realm;
@@ -61,10 +58,10 @@ class StepCredentialIssuer implements CredentialIssuer
 
 	public function issue(): CertificateCredential
 	{
-	  //$pkcs12 = $this->generateClientCertificate();
+	  $pkcs12 = $this->generateClientCertificate($this->user->attributes);
 
 		return new CertificateCredential(
-			credentialId: null,
+			credentialId: 'anonymous',
 			userId: $this->user->userId,
 			clientId: $this->user->clientId,
 			grantSid: $this->user->grantSid,
@@ -75,116 +72,117 @@ class StepCredentialIssuer implements CredentialIssuer
 		);
 	}
 
-}
+	/*
+	 * Given an array of user attributes (claims), issue a
+	 * certificate using step-ca
+	 */
+	private function generateClientCertificate(array $claims): PKCS12
+	{
+	    $tmpDir = sys_get_temp_dir() . '/letswifi-step-'
+	      . bin2hex(random_bytes(8));
 
-// private
-function generateClientCertificate(): PKCS12
-{
-  $tmpDir = sys_get_temp_dir() . '/letswifi-step-'
-    . bin2hex(random_bytes(8));
+	    mkdir($tmpDir, 0700, true);
 
-  mkdir($tmpDir, 0700, true);
+	    $rootCert = new X509
+	      (
+	       'file:///etc/step-cli/certs/root_ca.crt'
+	       );
 
-  $rootCert = new X509
-    (
-     'file:///etc/step-cli/certs/root_ca.crt'
-     );
-
-  $intermediateCert = new X509
-    (
-     'file:///etc/step-cli/certs/intermediate_ca.crt'
-     );
+	    $intermediateCert = new X509
+	      (
+	       'file:///etc/step-cli/certs/intermediate_ca.crt'
+	       );
   
-  try {
+	    try {
 
-    $crtFile  = $tmpDir . '/user.crt';
-    $keyFile = $tmpDir . '/user.key';
+	      $crtFile  = $tmpDir . '/user.crt';
+	      $keyFile = $tmpDir . '/user.key';
 
-    $descriptors = [
-		    0 => ['file', '/dev/null', 'r'],
-		    1 => ['pipe', 'w'],
-		    2 => ['pipe', 'w'],
-		    ];
+	      $argv = [
+		       'step',
+		       'ca',
+		       'certificate',
+		       'letswifi',
+		       $crtFile,
+		       $keyFile,
+		       '--provisioner=byod',
+		       '--provisioner-password-file=/etc/step-cli/secrets/password-provisioner-byod.txt',
+		       '--console',
+		       ];
 
-    $pipes = []; // proc_open will populate
+	      // convert claims to san attributes
+	      foreach ($claims as $key => $value) {
+		if (str_starts_with($key, 'urn:sa:')) {
+		  // claims are always returned as an array;
+		  // only take first item
+		  $argv[] = '--san=' . $key . ':' . $value[0];
+		}
+	      }
 
-    $process = proc_open(
-			 [
-			  'step',
-			  'ca',
-			  'certificate',
-			  'letswifi',
-			  $crtFile,
-			  $keyFile,
-			  '--provisioner=byod',
-			  '--provisioner-password-file=/opt/step-ca/secrets/password-provisioner-byod.txt',
-			  '--san=urn:sa:fmid:BYOD_TEST',
-			  '--console',
-			  ],
-			 $descriptors,
-			 $pipes,
-			 $tmpDir,
-			 [
-			  'STEPPATH' => '/etc/step-cli',
-			  ],
-			 );
+	      $descriptors = [
+			      0 => ['file', '/dev/null', 'r'],
+			      1 => ['pipe', 'w'],
+			      2 => ['pipe', 'w'],
+			      ];
 
-    if (!is_resource($process)) {
-      throw new RuntimeException('Unable to start step');
-    }
+	      $pipes = []; // proc_open will populate
 
-    $stdout = stream_get_contents($pipes[1]);
-    $stderr = stream_get_contents($pipes[2]);
+	      $process = proc_open(
+				   $argv,
+				   $descriptors,
+				   $pipes,
+				   $tmpDir,
+				   [
+				    'STEPPATH' => '/etc/step-cli',
+				    ],
+				   );
 
-    fclose($pipes[1]);
-    fclose($pipes[2]);
+	      if (!is_resource($process)) {
+		throw new RuntimeException('Unable to start step');
+	      }
 
-    $exitCode = proc_close($process);
+	      $stdout = stream_get_contents($pipes[1]);
+	      $stderr = stream_get_contents($pipes[2]);
 
-    if ($exitCode !== 0) {
-      throw new RuntimeException(
-				 "step ca certificate failed:\n{$stderr}"
-				 );
-    }
+	      fclose($pipes[1]);
+	      fclose($pipes[2]);
 
-    $leafPem = file_get_contents($crtFile);
+	      $exitCode = proc_close($process);
 
-    if (!preg_match(
-		    '/-----BEGIN CERTIFICATE-----.*?-----END CERTIFICATE-----/s',
-		    $leafPem,
-		    $matches
-		    )) {
-      throw new RuntimeException('No certificate found');
-    }
+	      if ($exitCode !== 0) {
+		throw new RuntimeException(
+					   'Step failed: '
+					   . implode(' ', $argv)
+					   . ': ' . $stderr
+					   );
+	      }
 
-    $userCert = new X509($matches[0]);
+	      $leafPem = file_get_contents($crtFile);
 
-    $userKey = new PrivateKey('file://' . $keyFile);
+	      if (!preg_match(
+			      '/-----BEGIN CERTIFICATE-----.*?-----END CERTIFICATE-----/s',
+			      $leafPem,
+			      $matches
+			      )) {
+		throw new RuntimeException('No certificate found');
+	      }
 
-    return new PKCS12(
-		      $userCert,
-		      $userKey,
-		      [$intermediateCert, $rootCert]
-		      );
+	      $userCert = new X509($matches[0]);
 
-  } finally {
+	      $userKey = new PrivateKey('file://' . $keyFile);
 
-    @unlink($keyFile ?? '');
-    @unlink($crtFile ?? '');
-    @rmdir($tmpDir);
-  }
-}
+	      return new PKCS12(
+				$userCert,
+				$userKey,
+				[$intermediateCert, $rootCert]
+				);
+	      
+	    } finally {
 
-// *********** FIXME **********
-echo "Hi\n";
+		@unlink($keyFile ?? '');
+		@unlink($crtFile ?? '');
+		@rmdir($tmpDir);
+	    }
+	}
 
-try {
-  $result = generateClientCertificate();
-  
-  var_dump($result);
-}
-catch (Throwable $e) {
-  echo "ERROR: " . $e->getMessage() . PHP_EOL;
-  echo $e->getTraceAsString() . PHP_EOL;
-  exit(1);
 }
