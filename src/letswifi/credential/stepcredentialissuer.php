@@ -111,8 +111,7 @@ class StepCredentialIssuer implements CredentialIssuer
 		       ];
 
 	      // letswifi doesn't have access to as many user details
-	      // as MDM, so synthesize some information
-	      $argv[] = '--san=urn:sa:serial:BYOD';
+	      // as MDM, so synthesize some information as a placeholder
 	      $argv[] = '--san=urn:sa:product:letswifi';
 
 	      // convert claims to san attributes
