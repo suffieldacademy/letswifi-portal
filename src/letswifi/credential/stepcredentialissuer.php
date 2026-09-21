@@ -117,9 +117,16 @@ class StepCredentialIssuer implements CredentialIssuer
 	      // convert claims to san attributes
 	      foreach ($claims as $key => $value) {
 		if (str_starts_with($key, 'urn:sa:')) {
-		  // claims are always returned as an array;
-		  // only take first item
-		  $argv[] = '--san=' . $key . ':' . $value[0];
+		  // A URI SAN expects IA5String (aka 7-bit ASCII),
+		  // and Step CA enforces this.  So, we must remove
+		  // any values that are not compliant to prevent
+		  // Step CA from erroring out
+		  $ia5 = transliterator_transliterate
+		    (
+		     'Any-Latin; Latin-ASCII; [^\u0020-\u007E] remove',
+		     $value[0] // claims are always array; assume first item
+		    );
+		  $argv[] = '--san=' . $key . ':' . $ia5;
 		}
 	      }
 
